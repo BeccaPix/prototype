@@ -1,6 +1,6 @@
 self.addEventListener("install", (event) => {
     event.waitUntil(
-      caches.open("dreamie-cache").then((cache) => {
+      caches.open("dreamie-cache-v2").then((cache) => { ////////////////
         return cache.addAll(["./", "./index.html"]);
       })
     );
@@ -14,3 +14,20 @@ self.addEventListener("install", (event) => {
     );
   });
   
+  self.addEventListener("activate", (event) => {
+    event.waitUntil(
+      caches.keys().then((keyList) => {
+        return Promise.all(
+          keyList.map((key) => {
+            if (key !== "dreamie-cache-v2") { ////////////////
+              return caches.delete(key);
+            }
+          })
+        );
+      })
+    );
+  });
+  
+
+  // ➡️ Tu changes "dreamie-cache-v2" à chaque fois que tu modifies les fichiers.
+
