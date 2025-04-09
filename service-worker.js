@@ -1,6 +1,6 @@
 self.addEventListener("install", (event) => {
     event.waitUntil(
-      caches.open("dreamie-cache-v2").then((cache) => { ////////////////
+      caches.open("dreamie-cache-3").then((cache) => { ////////////////
         return cache.addAll(["./", "./index.html"]);
       })
     );
@@ -19,7 +19,7 @@ self.addEventListener("install", (event) => {
       caches.keys().then((keyList) => {
         return Promise.all(
           keyList.map((key) => {
-            if (key !== "dreamie-cache-v2") { ////////////////
+            if (key !== "dreamie-cache-3") { ////////////////
               return caches.delete(key);
             }
           })
