@@ -53,7 +53,7 @@
 
 <body>
 
-  <button id="fullscreen-btn"> Affichage plein écran</button>
+  <button onclick="enterFullscreen()">Plein écran miroir</button>
 
 
   <div class="info">
@@ -67,16 +67,29 @@
     const sheetName = "Sheet1";
     const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
   
-    document.getElementById("fullscreen-btn").addEventListener("click", () => {
-  const docElm = document.documentElement;
-  if (docElm.requestFullscreen) {
-    docElm.requestFullscreen();
-  } else if (docElm.webkitRequestFullscreen) { // Safari
-    docElm.webkitRequestFullscreen();
-  } else if (docElm.msRequestFullscreen) {
-    docElm.msRequestFullscreen();
+    function enterFullscreen() {
+  const elem = document.documentElement;
+
+  // Demande le plein écran
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // pour Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // pour IE/Edge
+    elem.msRequestFullscreen();
+  }
+
+  // Applique le miroir horizontal
+  document.body.style.transform = "scaleX(-1)";
+}
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement) {
+    // En dehors du plein écran => enlever le miroir
+    document.body.style.transform = "none";
   }
 });
+
 
 
     async function fetchData() {
