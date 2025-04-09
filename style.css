@@ -1,0 +1,53 @@
+/* body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black;
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  } */
+  
+
+
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: #ffeaff;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    text-align: center;
+  }
+  .info {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    min-width: 300px;
+    max-width: 400px;
+  }
+  h1 {
+    font-size: 3rem;
+    margin: 0.5rem 0;
+  }
+  p {
+    font-size: 1.2rem;
+    margin: 0.3rem 0;
+  }
+
+  #container {
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+  }
+  
+  #main-content {
+    font-size: 2rem;
+  }
+  

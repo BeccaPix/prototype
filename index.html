@@ -1,10 +1,15 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffc0cb">
+
+  <!-- plein ecran apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 
   <title>DreamieBox Display</title>
   <link rel="stylesheet" href="style.css">
@@ -47,6 +52,10 @@
 </script>
 
 <body>
+
+  <button id="fullscreen-btn"> Affichage plein écran</button>
+
+
   <div class="info">
     <h1 id="time">--:--</h1>
     <p id="msg">Loading...</p>
@@ -54,25 +63,46 @@
   </div>
 
   <script>
-    const sheetId = "1als6q4Y1rZrACikcNAApVUxV6_65v7czAAPoqesPe6Q"; // À remplacer
-    const sheetName = "Sheet1"; // Nom de l'onglet Google Sheet
+    const sheetId = "1als6q4Y1rZrACikcNAApVUxV6_65v7czAAPoqesPe6Q";
+    const sheetName = "Sheet1";
     const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+  
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+  const docElm = document.documentElement;
+  if (docElm.requestFullscreen) {
+    docElm.requestFullscreen();
+  } else if (docElm.webkitRequestFullscreen) { // Safari
+    docElm.webkitRequestFullscreen();
+  } else if (docElm.msRequestFullscreen) {
+    docElm.msRequestFullscreen();
+  }
+});
+
 
     async function fetchData() {
       try {
         const response = await fetch(url);
         const data = await response.json();
-
-        // Affichage des données de la première ligne (index 0)
-        document.getElementById("time").textContent = data[0].Time || "--:--";
+  
+        // Affichage direct des infos si dispo
         document.getElementById("msg").textContent = data[0].Message || "Hello!";
         document.getElementById("battery").textContent = data[0].Battery || "--%";
+  
+        // Affiche l'heure locale SI Command est SHOW_TIME
+        if (data[0].Command && data[0].Command.trim().toUpperCase() === "SHOW_TIME") {
+          const now = new Date();
+          const formatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          document.getElementById("time").textContent = formatted;
+        }
+  
       } catch (err) {
         console.error("Erreur de chargement:", err);
       }
     }
-    fetchData();
-    setInterval(fetchData, 3000); // Toutes les 10 secondes
+  
+    // Mise à jour toutes les 3 secondes
+    setInterval(fetchData, 3000);
   </script>
+  
 </body>
-</html>
+</html> 
