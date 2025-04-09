@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffc0cb">
+
+  <title>DreamieBox Display</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: #ffeaff;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
+    .info {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+      max-width: 400px;
+    }
+    h1 {
+      font-size: 3rem;
+      margin: 0.5rem 0;
+    }
+    p {
+      font-size: 1.2rem;
+      margin: 0.3rem 0;
+    }
+  </style>
+</head>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker Registered"));
+  }
+</script>
+
+<body>
+  <div class="info">
+    <h1 id="time">--:--</h1>
+    <p id="msg">Loading...</p>
+    <p id="battery">Battery: --%</p>
+  </div>
+
+  <script>
+    const sheetId = "1als6q4Y1rZrACikcNAApVUxV6_65v7czAAPoqesPe6Q"; // À remplacer
+    const sheetName = "Sheet1"; // Nom de l'onglet Google Sheet
+    const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+    async function fetchData() {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Affichage des données de la première ligne (index 0)
+        document.getElementById("time").textContent = data[0].Time || "--:--";
+        document.getElementById("msg").textContent = data[0].Message || "Hello!";
+        document.getElementById("battery").textContent = data[0].Battery || "--%";
+      } catch (err) {
+        console.error("Erreur de chargement:", err);
+      }
+    }
+    fetchData();
+    setInterval(fetchData, 3000); // Toutes les 10 secondes
+  </script>
+</body>
+</html>
