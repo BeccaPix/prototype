@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,10 +6,9 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffc0cb">
 
-  <!-- plein ecran apple -->
+  <!-- plein écran apple -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>DreamieBox Display</title>
   <link rel="stylesheet" href="style.css">
@@ -25,7 +24,9 @@
       height: 100vh;
       flex-direction: column;
       text-align: center;
+      transition: transform 0.3s ease;
     }
+
     .info {
       background: white;
       border-radius: 1.5rem;
@@ -34,16 +35,46 @@
       min-width: 300px;
       max-width: 400px;
     }
+
     h1 {
       font-size: 3rem;
       margin: 0.5rem 0;
     }
+
     p {
       font-size: 1.2rem;
       margin: 0.3rem 0;
     }
+
+    button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 20px;
+      background-color: #ff69b4;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background-color: #e0559f;
+    }
+
+    .battery-container {
+      margin-top: 1rem;
+    }
+
+    .battery-text {
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
+
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js")
@@ -55,67 +86,103 @@
 
   <button onclick="enterFullscreen()">Plein écran miroir</button>
 
-
   <div class="info">
     <h1 id="time">--:--</h1>
     <p id="msg">Loading...</p>
-    <p id="battery">Battery: --%</p>
+
+    <!-- Batterie animée -->
+    <div class="battery-container">
+      <svg width="80" height="40" viewBox="0 0 80 40">
+        <!-- Contour de la batterie -->
+        <rect x="2" y="10" width="70" height="20" rx="4" ry="4" fill="none" stroke="#ff69b4" stroke-width="3"/>
+        <!-- Embout de la batterie -->
+        <rect x="72" y="15" width="6" height="10" rx="2" ry="2" fill="#ff69b4"/>
+        <!-- Niveau de batterie -->
+        <rect id="batteryLevel" x="4" y="12" width="0" height="16" rx="2" ry="2" fill="green" />
+      </svg>
+      <div id="batteryText" class="battery-text">Battery: --%</div>
+    </div>
   </div>
 
   <script>
     const sheetId = "1als6q4Y1rZrACikcNAApVUxV6_65v7czAAPoqesPe6Q";
     const sheetName = "Sheet1";
     const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
-  
+
     function enterFullscreen() {
-  const elem = document.documentElement;
+      const elem = document.documentElement;
 
-  // Demande le plein écran
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.webkitRequestFullscreen) { // pour Safari
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { // pour IE/Edge
-    elem.msRequestFullscreen();
-  }
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
 
-  // Applique le miroir horizontal
-  document.body.style.transform = "scaleX(-1)";
-}
+      // Miroir horizontal
+      document.body.style.transform = "scaleX(-1)";
+    }
 
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement) {
-    // En dehors du plein écran => enlever le miroir
-    document.body.style.transform = "none";
-  }
-});
-
-
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        document.body.style.transform = "none";
+      }
+    });
 
     async function fetchData() {
       try {
         const response = await fetch(url);
         const data = await response.json();
-  
-        // Affichage direct des infos si dispo
+
         document.getElementById("msg").textContent = data[0].Message || "Hello!";
-        document.getElementById("battery").textContent = data[0].Battery || "--%";
-  
-        // Affiche l'heure locale SI Command est SHOW_TIME
+
         if (data[0].Command && data[0].Command.trim().toUpperCase() === "SHOW_TIME") {
           const now = new Date();
-          const formatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          const formatted = now.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
           document.getElementById("time").textContent = formatted;
         }
-  
+
       } catch (err) {
         console.error("Erreur de chargement:", err);
       }
     }
-  
-    // Mise à jour toutes les 3 secondes
+
     setInterval(fetchData, 3000);
+
+    // Batterie animée
+    if ('getBattery' in navigator) {
+      navigator.getBattery().then(battery => {
+        const levelBar = document.getElementById("batteryLevel");
+        const text = document.getElementById("batteryText");
+
+        function updateBattery() {
+          const level = Math.round(battery.level * 100);
+          const width = (level / 100) * 64;
+          let color = 'green';
+
+          if (level <= 20) color = 'red';
+          else if (level <= 50) color = 'orange';
+
+          levelBar.setAttribute("width", width);
+          levelBar.setAttribute("fill", color);
+
+          const charging = battery.charging ? "⚡ Charging" : "";
+          text.textContent = `Battery: ${level}% ${charging}`;
+        }
+
+        updateBattery();
+
+        battery.addEventListener("levelchange", updateBattery);
+        battery.addEventListener("chargingchange", updateBattery);
+      });
+    } else {
+      document.getElementById("batteryText").textContent = "Battery: not available";
+    }
   </script>
-  
 </body>
-</html> 
+</html>
